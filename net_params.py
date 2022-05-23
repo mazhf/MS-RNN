@@ -16,7 +16,7 @@ else:
     k, s, p = None, None, None
 
 if cfg.model_name == 'TrajGRU':
-    rnn_param = TrajGRU(input_channel=hs, output_channel=hs, b_h_w=(b, h, w))
+    rnn_param = TrajGRU(input_channel=hs, output_channel=hs, b_h_w=(b, h, w), kernel_size=k, stride=s, padding=p)
 elif cfg.model_name == 'MIM':
     rnn_param = MIM(input_channel=hs, output_channel=hs, b_h_w=(b, h, w), kernel_size=k, stride=s, padding=p)
 elif cfg.model_name == 'PredRNN':
