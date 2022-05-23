@@ -13,7 +13,6 @@ from train_and_test import train_and_test
 from net_params import params
 import random
 import numpy as np
-from hypergrad import SGDHD, AdamHD
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from util.load_data import load_data
@@ -52,10 +51,6 @@ if cfg.optimizer == 'SGD':
 elif cfg.optimizer == 'Adam':
     optimizer = torch.optim.Adam(model.parameters(), lr=LR)
     # lr_schedul = lr_scheduler.StepLR(optimizer, step_size=LR_epoch_size, gamma=gamma)
-elif cfg.optimizer == 'SGDHD':
-    optimizer = SGDHD(model.parameters(), lr=LR, hypergrad_lr=1e-8)
-elif cfg.optimizer == 'AdamHD':
-    optimizer = AdamHD(model.parameters(), lr=LR, hypergrad_lr=1e-8)
 
 # 设置并行——以下设置顺序不可颠倒！run: python -m torch.distributed.launch --nproc_per_node=4 --master_port 39985 main.py
 # torch.distributed.launch arguments 该参数只能这么用，其他参数只能放在命令行。。。

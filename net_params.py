@@ -47,7 +47,6 @@ elif cfg.model_name == 'Multi_Scale_TrajGRU':
     rnn_param = Multi_Scale_TrajGRU(input_channel=hs, output_channel=hs, b_h_w=(b, h, w), kernel_size=k, stride=s, padding=p)
 
 
-
 if cfg.dataset in ['human3.6m', 'ucf50', 'sports10']:
     params = [OrderedDict({'conv_embed': [3, hs, 1, 1, 0, 1]}),
               rnn_param,

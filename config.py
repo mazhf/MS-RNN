@@ -6,7 +6,7 @@ import numpy as np
 
 cfg = edict()
 
-# ConvLSTM  TrajGRU  PredRNN  PredRNN++ MIM  MotionRNN_PredRNN  MotionRNN_MIM
+# ConvLSTM  TrajGRU  PredRNN  PredRNN++ MIM  MotionRNN_MIM
 # Multi_Scale_Unet3plus_ConvLSTM  Multi_Scale_Fully_Connected_ConvLSTM  Muti_Scale_No_Skip_ConvLSTM
 # Multi_Scale_ConvLSTM  Multi_Scale_TrajGRU  Multi_Scale_PredRNN  Multi_Scale_PredRNN++
 # Multi_Scale_MIM  Multi_Scale_MotionRNN_MIM
@@ -14,7 +14,7 @@ cfg.model_name = 'ConvLSTM'
 cfg.gpu = '0, 1, 2, 3'
 cfg.gpu_nums = len(cfg.gpu.split(','))
 cfg.work_path = 'Spatiotemporal'
-cfg.dataset = 'moving-mnist-20'  # moving-mnist-20  kth_resize_png taxiBJ HKO-7-120-with-mask
+cfg.dataset = 'moving-mnist-20'  # moving-mnist-20  kth_resize_png  taxiBJ  HKO-7-120-with-mask
 cfg.data_path = 'Spatiotemporal'
 cfg.kth_only_run = True
 if 'mnist' in cfg.dataset:
@@ -62,14 +62,11 @@ cfg.valid_num = 10
 cfg.valid_epoch = cfg.epoch // cfg.valid_num
 cfg.LR = 0.0003  # 0.001
 cfg.optimizer = 'Adam'
-cfg.normal_mae_mse_loss = 1  # 0.001
+cfg.normal_mae_mse_loss = 1
 cfg.dataloader_thread = 0
 cfg.data_type = np.float32
 cfg.use_scheduled_sampling = True
-cfg.use_b = False
-cfg.TrajGRU_link_num = 10  # trajgru
-cfg.round = 4  # nowcastlstm
-cfg.nested = 3  # nestedlstm
+cfg.TrajGRU_link_num = 13
 cfg.LSTM_layers = 6
 
 cfg.GLOBAL = edict()
