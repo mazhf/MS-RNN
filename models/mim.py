@@ -45,7 +45,6 @@ class MIM_cell(nn.Module):
 
         self._input_channel = input_channel
         self._output_channel = output_channel
-        print('This is MIM!')
 
     def forward(self, x, xt_1, m, hiddens, l):
         if hiddens is None:
@@ -59,9 +58,6 @@ class MIM_cell(nn.Module):
                             dtype=torch.float).cuda()
         else:
             h, c, n, s = hiddens
-        if x is None:
-            x = torch.zeros((h.shape[0], self._input_channel, self._state_height, self._state_width),
-                            dtype=torch.float).cuda()
         if xt_1 is None:
             xt_1 = torch.zeros((x.shape[0], self._output_channel, self._state_height, self._state_width),
                                dtype=torch.float).cuda()
@@ -125,10 +121,10 @@ class MIM(nn.Module):
         lstm = [MIM_cell(input_channel, output_channel, b_h_w, kernel_size, stride, padding) for l in
                 range(self.n_layers)]
         self.lstm = nn.ModuleList(lstm)
+        print('This is MIM!')
 
     def forward(self, x, m, layer_hiddens, embed, fc):
-        if x is not None:
-            x = embed(x)
+        x = embed(x)
         next_layer_hiddens = []
         for l in range(self.n_layers):
             if layer_hiddens is not None:
@@ -140,7 +136,7 @@ class MIM(nn.Module):
             else:
                 hiddens = None
                 xt_1 = None
-            x, m, next_hiddens = self.lstm[l](x, xt_1, m, hiddens, l)  # 运行一次生成一个convlstm
+            x, m, next_hiddens = self.lstm[l](x, xt_1, m, hiddens, l)
             next_layer_hiddens.append(next_hiddens)
         x = fc(x)
         return x, m, next_layer_hiddens

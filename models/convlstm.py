@@ -21,9 +21,8 @@ class ConvLSTM_cell(nn.Module):
         #                                kernel_size=1, stride=1, padding=0)
         self._input_channel = input_channel
         self._output_channel = output_channel
-        print('This is ConvLSTM!')
 
-    def forward(self, x, m, hiddens):
+    def forward(self, x, hiddens):
         if hiddens is None:
             c = torch.zeros((x.shape[0], self._input_channel, self._state_height, self._state_width),
                             dtype=torch.float).cuda()
@@ -31,9 +30,6 @@ class ConvLSTM_cell(nn.Module):
                             dtype=torch.float).cuda()
         else:
             h, c = hiddens
-        if x is None:
-            x = torch.zeros((h.shape[0], self._input_channel, self._state_height, self._state_width),
-                            dtype=torch.float).cuda()
         x2h = self._conv_x2h(x)
         h2h = self._conv_h2h(h)
         i, f, g, o = torch.chunk((x2h + h2h), 4, dim=1)
@@ -50,7 +46,7 @@ class ConvLSTM_cell(nn.Module):
 
         ouput = next_h
         next_hiddens = [next_h, next_c]
-        return ouput, m, next_hiddens
+        return ouput, next_hiddens
 
 
 class ConvLSTM(nn.Module):
@@ -60,17 +56,17 @@ class ConvLSTM(nn.Module):
         lstm = [ConvLSTM_cell(input_channel, output_channel, b_h_w, kernel_size, stride, padding) for l in
                 range(self.n_layers)]
         self.lstm = nn.ModuleList(lstm)
+        print('This is ConvLSTM!')
 
     def forward(self, x, m, layer_hiddens, embed, fc):
-        if x is not None:
-            x = embed(x)
+        x = embed(x)
         next_layer_hiddens = []
         for l in range(self.n_layers):
             if layer_hiddens is not None:
                 hiddens = layer_hiddens[l]
             else:
                 hiddens = None
-            x, m, next_hiddens = self.lstm[l](x, m, hiddens)  # 运行一次生成一个convlstm
+            x, next_hiddens = self.lstm[l](x, hiddens)
             next_layer_hiddens.append(next_hiddens)
         x = fc(x)
         return x, m, next_layer_hiddens

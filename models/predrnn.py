@@ -1,7 +1,6 @@
 from torch import nn
 import torch
 import sys
-
 sys.path.append("..")
 from config import cfg
 
@@ -29,7 +28,6 @@ class PredRNN_cell(nn.Module):
 
         self._input_channel = input_channel
         self._output_channel = output_channel
-        print('This is PredRNN!')
 
     def forward(self, x, m, hiddens):
         if hiddens is None:
@@ -39,9 +37,6 @@ class PredRNN_cell(nn.Module):
                             dtype=torch.float).cuda()
         else:
             h, c = hiddens
-        if x is None:
-            x = torch.zeros((h.shape[0], self._input_channel, self._state_height, self._state_width),
-                            dtype=torch.float).cuda()
         if m is None:
             m = torch.zeros((x.shape[0], self._output_channel, self._state_height, self._state_width),
                             dtype=torch.float).cuda()
@@ -76,17 +71,17 @@ class PredRNN(nn.Module):
         lstm = [PredRNN_cell(input_channel, output_channel, b_h_w, kernel_size, stride, padding) for l in
                 range(self.n_layers)]
         self.lstm = nn.ModuleList(lstm)
+        print('This is PredRNN!')
 
     def forward(self, x, m, layer_hiddens, embed, fc):
-        if x is not None:
-            x = embed(x)
+        x = embed(x)
         next_layer_hiddens = []
         for l in range(self.n_layers):
             if layer_hiddens is not None:
                 hiddens = layer_hiddens[l]
             else:
                 hiddens = None
-            x, m, next_hiddens = self.lstm[l](x, m, hiddens)  # 一个convlstm
+            x, m, next_hiddens = self.lstm[l](x, m, hiddens)
             next_layer_hiddens.append(next_hiddens)
         x = fc(x)
         return x, m, next_layer_hiddens

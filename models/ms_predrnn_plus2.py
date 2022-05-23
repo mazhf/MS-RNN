@@ -26,7 +26,6 @@ class PredRNN_plus2_cell(nn.Module):
 
         self._input_channel = input_channel
         self._output_channel = output_channel
-        print('This is Multi Scale PredRNN++!')
 
     def forward(self, x, m, hiddens, l):
         if hiddens is None:
@@ -38,14 +37,9 @@ class PredRNN_plus2_cell(nn.Module):
                             dtype=torch.float).cuda()
         else:
             h, c, z = hiddens
-
-        if x is None:
-            x = torch.zeros((h.shape[0], self._input_channel, self._state_height, self._state_width),
-                            dtype=torch.float).cuda()
         if m is None:
             m = torch.zeros((x.shape[0], self._output_channel, self._state_height, self._state_width),
                             dtype=torch.float).cuda()
-
         # GHU
         if l == 1:
             x2h = self._conv_x(x)
@@ -82,8 +76,6 @@ class PredRNN_plus2_cell(nn.Module):
 
 
 class Multi_Scale_PredRNN_plus2(nn.Module):
-    """Unet: like Unet use maxpooling and bilinear for downsampling and upsampling"""
-
     def __init__(self, input_channel, output_channel, b_h_w, kernel_size, stride, padding):
         super().__init__()
         self.n_layers = cfg.LSTM_layers
@@ -96,19 +88,16 @@ class Multi_Scale_PredRNN_plus2(nn.Module):
                 PredRNN_plus2_cell(input_channel, output_channel, [B, H, W], kernel_size, stride, padding)]
         self.lstm = nn.ModuleList(lstm)
 
-        self.downs = [nn.MaxPool2d(2, 2), nn.MaxPool2d(2, 2)]
-        self.ups = [nn.Upsample(scale_factor=2, mode='bilinear'), nn.Upsample(scale_factor=2, mode='bilinear')]
+        self.downs = nn.ModuleList([nn.MaxPool2d(2, 2), nn.MaxPool2d(2, 2)])
+        self.ups = nn.ModuleList([nn.Upsample(scale_factor=2, mode='bilinear'), nn.Upsample(scale_factor=2, mode='bilinear')])
 
-        self.downs_m = [nn.MaxPool2d(2, 2), nn.MaxPool2d(2, 2)]
-        self.ups_m = [nn.Upsample(scale_factor=2, mode='bilinear'), nn.Upsample(scale_factor=2, mode='bilinear')]
+        self.downs_m = nn.ModuleList([nn.MaxPool2d(2, 2), nn.MaxPool2d(2, 2)])
+        self.ups_m = nn.ModuleList([nn.Upsample(scale_factor=2, mode='bilinear'), nn.Upsample(scale_factor=2, mode='bilinear')])
 
-        concat = [nn.Conv2d(input_channel * 2, output_channel, 1, 1, 0),
-                  nn.Conv2d(input_channel * 2, output_channel, 1, 1, 0)]
-        self.concat = nn.ModuleList(concat)
+        print('This is Multi Scale PredRNN++!')
 
     def forward(self, x, m, layer_hiddens, embed, fc):
-        if x is not None:
-            x = embed(x)
+        x = embed(x)
         next_layer_hiddens = []
         out = []
         for l in range(self.n_layers):
@@ -116,7 +105,7 @@ class Multi_Scale_PredRNN_plus2(nn.Module):
                 hiddens = layer_hiddens[l]
             else:
                 hiddens = None
-            x, m, next_hiddens = self.lstm[l](x, m, hiddens, l)  # 运行一次生成一个convlstm
+            x, m, next_hiddens = self.lstm[l](x, m, hiddens, l)
             out.append(x)
             if l == 0:
                 x = self.downs[0](x)
@@ -125,12 +114,10 @@ class Multi_Scale_PredRNN_plus2(nn.Module):
                 x = self.downs[1](x)
                 m = self.downs_m[1](m)
             elif l == 3:
-                x = torch.cat([self.ups[0](x), out[1]], dim=1)
-                x = self.concat[0](x)
+                x = self.ups[0](x) + out[1]
                 m = self.ups_m[0](m)
             elif l == 4:
-                x = torch.cat([self.ups[1](x), out[0]], dim=1)
-                x = self.concat[1](x)
+                x = self.ups[1](x) + out[0]
                 m = self.ups_m[1](m)
             next_layer_hiddens.append(next_hiddens)
         x = fc(x)
