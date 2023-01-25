@@ -81,7 +81,6 @@ def train_and_test(model, optimizer, criterion, train_epoch, valid_epoch, save_c
             loss = criterion(train_batch[1:, ...], train_pred, epoch)
             loss.backward()
             optimizer.step()
-            torch.nn.utils.clip_grad_value_(model.parameters(), clip_value=5)
             # 更新lr、loss、metrics
             loss = reduce_tensor(loss)  # all reduce
             train_loss += loss.item()
