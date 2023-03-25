@@ -1,0 +1,9 @@
+README.md
+localAttention.cpp
+setup.py
+localAttention.egg-info/PKG-INFO
+localAttention.egg-info/SOURCES.txt
+localAttention.egg-info/dependency_links.txt
+localAttention.egg-info/top_level.txt
+src/similar.cu
+src/weighting.cu
