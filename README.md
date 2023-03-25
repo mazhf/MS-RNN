@@ -51,7 +51,7 @@ See connfig.py
 python -m torch.distributed.launch --nproc_per_node=4 main.py
 ```
 ### Citation：
-##### If you find this repo useful, please cite the following papers.
+##### If you find this repository useful, please cite the following papers.
 
 ```
 @article{ma2022ms,
