@@ -7,10 +7,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpu
 import torch
 from torch import nn
 from model import Model
-from torch.optim import lr_scheduler
-from loss import Weighted_mse_mae
+from loss import Loss
 from train_and_test import train_and_test
-from net_params import params
+from net_params import nets
 import random
 import numpy as np
 from torch.utils.data import DataLoader
@@ -32,28 +31,19 @@ def fix_random(seed):
     torch.backends.cudnn.enabled = False
 
 
-fix_random(2021)
+fix_random(2022)
 
 # params
 gpu_nums = cfg.gpu_nums
 batch_size = cfg.batch
 train_epoch = cfg.epoch
 valid_epoch = cfg.valid_epoch
-save_checkpoint_epoch = cfg.valid_epoch
 LR = cfg.LR
 
 # model
-model = Model(params[0], params[1], params[2])
+model = Model(nets[0], nets[1], nets[2])
 
-# optimizer
-if cfg.optimizer == 'SGD':
-    optimizer = torch.optim.SGD(model.parameters(), lr=LR, momentum=0.9)
-elif cfg.optimizer == 'Adam':
-    optimizer = torch.optim.Adam(model.parameters(), lr=LR)
-    # lr_schedul = lr_scheduler.StepLR(optimizer, step_size=LR_epoch_size, gamma=gamma)
-
-# 设置并行——以下设置顺序不可颠倒！run: python -m torch.distributed.launch --nproc_per_node=4 --master_port 39985 main.py
-# torch.distributed.launch arguments 该参数只能这么用，其他参数只能放在命令行。。。
+# run: python -m torch.distributed.launch --nproc_per_node=4 --master_port 39985 main.py
 parser = argparse.ArgumentParser()
 parser.add_argument("--local_rank", type=int, default=-1, help='node rank for distributed training')
 args = parser.parse_args()
@@ -68,23 +58,27 @@ model = model.cuda()
 model = nn.parallel.DistributedDataParallel(model, find_unused_parameters=True, device_ids=[args.local_rank],
                                             output_device=args.local_rank)
 
-# dataloader DataLoader的shuffle和DistributedSampler的shuffle为True只能使用一个，valid和test可以shuffle，但是为了取test demo就不了
 threads = cfg.dataloader_thread
 train_data, valid_data, test_data = load_data()
 train_sampler = DistributedSampler(train_data, shuffle=True)
 valid_sampler = DistributedSampler(valid_data, shuffle=False)
 train_loader = DataLoader(train_data, num_workers=threads, batch_size=batch_size, shuffle=False, pin_memory=True,
                           sampler=train_sampler)
-# 通常情况下，数据在内存中要么以锁页的方式存在，要么保存在虚拟内存(磁盘)中，设置为True后，数据直接保存在锁页内存中，后续直接传入cuda；
-# 否则需要先从虚拟内存中传入锁页内存中，再传入cuda，这样就比较耗时了，但是对于内存的大小要求比较高。
-# 先把dataset读到CPU上，然后GPU只读每个batch的数据，ucf50数据集太大，导致训练集和验证集都加载完后，没有test的内存地方了
 test_loader = DataLoader(test_data, num_workers=threads, batch_size=batch_size, shuffle=False, pin_memory=False)
 valid_loader = DataLoader(valid_data, num_workers=threads, batch_size=batch_size, shuffle=False, pin_memory=True,
                           sampler=valid_sampler)
 loader = [train_loader, test_loader, valid_loader]
 
+# optimizer
+if cfg.optimizer == 'SGD':
+    optimizer = torch.optim.SGD(model.parameters(), lr=LR, momentum=0.9)
+elif cfg.optimizer == 'Adam':
+    optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+else:
+    optimizer = None
+
 # loss
-criterion = Weighted_mse_mae().cuda()
+criterion = Loss().cuda()
 
 # train valid test
-train_and_test(model, optimizer, criterion, train_epoch, valid_epoch, save_checkpoint_epoch, loader, train_sampler)
+train_and_test(model, optimizer, criterion, train_epoch, valid_epoch, loader, train_sampler)

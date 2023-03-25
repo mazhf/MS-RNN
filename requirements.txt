@@ -1,0 +1,16 @@
+torch
+torchvision
+torchaudio
+openpyxl
+numpy
+pandas
+scipy
+numba
+opencv-python
+h5py==2.9.0
+pillow
+thop
+tqdm
+tensorboardX
+
+
