@@ -23,11 +23,8 @@
 | MK-LSTM  | MS-LSTM  |
 
 ### Installing Libraries:
-#### * Installing Pytorch:
 
-[https://pytorch.org](https://pytorch.org)
-
-#### * Installing Third-party Dependency Libraries:
+#### * Installing Libraries:
 ```shell
 pip3 install -r requirements.txt
 ```
