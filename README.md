@@ -69,3 +69,11 @@ python -m torch.distributed.launch --nproc_per_node=4 main.py
   publisher={IEEE}
 }
 ```
+```
+@article{ma2023ms,
+  title={MS-LSTM: Exploring Spatiotemporal Multiscale Representations in Video Prediction Domain},
+  author={Ma, Zhifeng and Zhang, Hao and Liu, Jie},
+  journal={arXiv preprint arXiv:2304.07724},
+  year={2023}
+}
+```
