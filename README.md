@@ -26,7 +26,7 @@
 
 #### * Installing Libraries:
 ```shell
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu113
 ```
 
 #### * Installing CUDA (Only Needed for Reproducing PrecipLSTM/MS-PrecipLSTM):
