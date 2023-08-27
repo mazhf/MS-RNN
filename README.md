@@ -41,7 +41,7 @@ python setup.py install
 [https://github.com/zzd1992/Image-Local-Attention](https://github.com/zzd1992/Image-Local-Attention)
 
 ### Hyperparameters:
-See connfig.py
+See config.py
 
 ###  Running:
 ```shell
