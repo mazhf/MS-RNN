@@ -76,6 +76,7 @@ python -m torch.distributed.launch --nproc_per_node=4 main.py
   journal={Applied Soft Computing},
   volume = {147},
   pages = {110731},
-  year={2023}
+  year={2023},
+  publisher={Elsevier}
 }
 ```
