@@ -105,4 +105,5 @@ class MS_LSTM(nn.Module):
                 x = self.ups[1](x) + out[0]
             next_layer_hiddens.append(next_hiddens)
         x = fc(x)
-        return x, m, next_layer_hiddens
+        decouple_loss = torch.zeros([cfg.LSTM_layers, cfg.batch, cfg.lstm_hidden_state]).cuda()
+        return x, m, next_layer_hiddens, decouple_loss
